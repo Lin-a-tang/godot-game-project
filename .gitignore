@@ -1,0 +1,43 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot 3 imports (legacy)
+.import/
+
+# Export
+export.cfg
+export_presets.cfg
+
+# Translations
+*.translation
+
+# Mono / C#
+.mono/
+data_*/
+mono_crash.*.json
+
+# System / OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+build/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Android
+android/
+
+# Temporary
+*.tmp
+*.bak
+*~
