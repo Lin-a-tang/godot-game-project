@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://udvv4nrau1up"]
+
+[ext_resource type="Environment" uid="uid://tbenmt8lsqqm" path="res://materials/environment.tres" id="1_c2ibq"]
+[ext_resource type="Material" uid="uid://bfjjpqs3vwq3e" path="res://materials/ground_mat.tres" id="2_j4qnp"]
+[ext_resource type="BoxMesh" uid="uid://bna6jq2gax4uq" path="res://meshes/ground30_mesh.tres" id="3_5vvyt"]
+[ext_resource type="Shape3D" uid="uid://c8csr2ixfy7cg" path="res://shapes/ground30_shape.tres" id="4_c6i3y"]
+[ext_resource type="Script" uid="uid://bgnruri3lxcq8" path="res://scripts/Player.gd" id="5_kjvhd"]
+[ext_resource type="Material" uid="uid://ibbrw7r4ec58" path="res://materials/player_dark_mat.tres" id="6_c2ibq"]
+[ext_resource type="CapsuleMesh" uid="uid://dn3obx1ut7urp" path="res://meshes/player_capsule_mesh.tres" id="7_j4qnp"]
+[ext_resource type="Shape3D" uid="uid://dyvyxa0toarav" path="res://shapes/player_capsule_shape.tres" id="8_fpfj3"]
+[ext_resource type="Material" uid="uid://cfcw7mdvu2hdn" path="res://materials/enemy_red_mat.tres" id="10_sc1dx"]
+[ext_resource type="Script" uid="uid://b22daep8nhjyp" path="res://scripts/Enemy.gd" id="11_hhcpw"]
+[ext_resource type="CapsuleMesh" uid="uid://b0a4g5eawq1hp" path="res://meshes/enemy_capsule_mesh.tres" id="11_kjvhd"]
+[ext_resource type="Shape3D" uid="uid://3l3rg5s37r1k" path="res://shapes/enemy_capsule_shape.tres" id="12_5tuhn"]
+
+[node name="Main" type="Node3D" unique_id=201604355]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1626663891]
+environment = ExtResource("1_c2ibq")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=326321119]
+transform = Transform3D(0.8253356, 0.36375266, -0.4318624, 0, 0.7648422, 0.64421767, 0.5646425, -0.5316958, 0.6312515, 0, 0, 0)
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=320688785]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=835623398]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+material_override = ExtResource("2_j4qnp")
+mesh = ExtResource("3_5vvyt")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1059287627]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = ExtResource("4_c6i3y")
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=35050122]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+script = ExtResource("5_kjvhd")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=2145027297]
+material_override = ExtResource("6_c2ibq")
+mesh = ExtResource("7_j4qnp")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1332555379]
+shape = ExtResource("8_fpfj3")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Player" unique_id=1401456982]
+
+[node name="Enemy1" type="CharacterBody3D" parent="." unique_id=844867935]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -4)
+script = ExtResource("11_hhcpw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Enemy1" unique_id=530017763]
+material_override = ExtResource("10_sc1dx")
+mesh = ExtResource("11_kjvhd")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy1" unique_id=1216733749]
+shape = ExtResource("12_5tuhn")
+
+[node name="Hurtbox" type="Area3D" parent="Enemy1" unique_id=1938552028]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy1/Hurtbox" unique_id=1103806712]
+shape = ExtResource("12_5tuhn")
+
+[node name="Enemy2" type="CharacterBody3D" parent="." unique_id=1678321203]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.75, -3)
+script = ExtResource("11_hhcpw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Enemy2" unique_id=1691326572]
+material_override = ExtResource("10_sc1dx")
+mesh = ExtResource("11_kjvhd")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy2" unique_id=1307942139]
+shape = ExtResource("12_5tuhn")
+
+[node name="Hurtbox" type="Area3D" parent="Enemy2" unique_id=45380112]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy2/Hurtbox" unique_id=825777419]
+shape = ExtResource("12_5tuhn")
+
+[node name="Enemy3" type="CharacterBody3D" parent="." unique_id=1319150751]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.75, -3)
+script = ExtResource("11_hhcpw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Enemy3" unique_id=1035467756]
+material_override = ExtResource("10_sc1dx")
+mesh = ExtResource("11_kjvhd")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy3" unique_id=936722904]
+shape = ExtResource("12_5tuhn")
+
+[node name="Hurtbox" type="Area3D" parent="Enemy3" unique_id=591626506]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy3/Hurtbox" unique_id=405119832]
+shape = ExtResource("12_5tuhn")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=376295552]
+transform = Transform3D(1, 0, 0, 0, 0.7073882, 0.7068252, 0, -0.7068252, 0.7073882, 0, 6.9, 6)

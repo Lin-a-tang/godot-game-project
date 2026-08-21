@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://ces3naevnsy6x"]
+
+[ext_resource type="BoxMesh" uid="uid://bhuxi7un138se" path="res://meshes/ground_mesh.tres" id="1_rnume"]
+[ext_resource type="Shape3D" uid="uid://dfnj8ls61wbkq" path="res://shapes/ground_shape.tres" id="2_xm5kw"]
+[ext_resource type="Script" uid="uid://bgnruri3lxcq8" path="res://scripts/Player.gd" id="3_0lchi"]
+[ext_resource type="CapsuleMesh" uid="uid://ctmkabue786uf" path="res://meshes/player_mesh.tres" id="4_mwgs0"]
+[ext_resource type="Shape3D" uid="uid://bygvgahnohpoa" path="res://shapes/player_shape.tres" id="5_ljq7k"]
+[ext_resource type="Script" uid="uid://b22daep8nhjyp" path="res://scripts/Enemy.gd" id="6_2gp81"]
+
+[node name="SmokeTest" type="Node3D" unique_id=1763413387]
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1628787291]
+transform = Transform3D(0.8253356, 0.36375266, -0.4318624, 0, 0.7648422, 0.64421767, 0.5646425, -0.5316958, 0.6312515, 0, 0, 0)
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=1087975138]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=1766840672]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = ExtResource("1_rnume")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=2138677723]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = ExtResource("2_xm5kw")
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=147568950]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+script = ExtResource("3_0lchi")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=1867085871]
+mesh = ExtResource("4_mwgs0")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1012036738]
+shape = ExtResource("5_ljq7k")
+
+[node name="Camera3D" type="Camera3D" parent="Player" unique_id=1666399409]
+transform = Transform3D(1, 0, 0, 0, 0.7073882, 0.7068252, 0, -0.7068252, 0.7073882, 0, 6, 6)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Player" unique_id=1439430778]
+
+[node name="Enemy" type="CharacterBody3D" parent="." unique_id=874024299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2)
+script = ExtResource("6_2gp81")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Enemy" unique_id=1848621882]
+mesh = ExtResource("4_mwgs0")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy" unique_id=154777597]
+shape = ExtResource("5_ljq7k")
+
+[node name="Hurtbox" type="Area3D" parent="Enemy" unique_id=876915971]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy/Hurtbox" unique_id=719421145]
+shape = ExtResource("5_ljq7k")
