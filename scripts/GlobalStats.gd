@@ -7,6 +7,7 @@ var level: int = 1
 var skill_points: int = 2
 var current_exp: int = 0
 var exp_to_next: int = 50
+var base_atk: int = 10
 
 
 func add_exp(amount: int) -> void:

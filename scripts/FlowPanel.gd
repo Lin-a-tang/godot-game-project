@@ -16,6 +16,10 @@ var desc_label: Label
 var add_button: Button
 var close_button: Button
 var flow_buttons: Array[Button] = []
+var q_name_label: Label
+var q_status_label: Label
+var r_name_label: Label
+var r_status_label: Label
 
 
 func _ready() -> void:
@@ -57,6 +61,9 @@ func _ready() -> void:
 	add_child(panel)
 
 	_build_panel_content()
+	FlowManager.skill_used.connect(refresh_ui)
+	FlowManager.flow_changed.connect(_on_flow_changed_refresh)
+	GlobalStats.stats_updated.connect(refresh_ui)
 	refresh_ui()
 	hide()
 
@@ -134,6 +141,14 @@ func refresh_ui() -> void:
 	# 加点按钮可用状态
 	add_button.disabled = GlobalStats.skill_points <= 0
 
+	# 技能状态
+	var status_q: Dictionary = flow.get_skill_status("q")
+	var status_r: Dictionary = flow.get_skill_status("r")
+	_update_skill_label(q_name_label, q_status_label, status_q)
+	_update_skill_label(r_name_label, r_status_label, status_r)
+
+	queue_redraw()
+
 
 func _resource_text(flow: BaseFlow) -> String:
 	if flow is Flow_Shouzhuo:
@@ -153,6 +168,26 @@ func _flow_desc(flow: BaseFlow) -> String:
 	elif flow is Flow_Cangfeng:
 		return "藏锋于身，闪避时积累残影。"
 	return ""
+
+
+func _update_skill_label(name_label: Label, status_label: Label, status: Dictionary) -> void:
+	var skill_name: String = str(status.get("name", ""))
+	if skill_name == "":
+		name_label.text = "--"
+		status_label.text = "未解锁"
+		status_label.add_theme_color_override("font_color", Color("#888888"))
+	elif bool(status.get("is_ready", false)):
+		name_label.text = skill_name
+		status_label.text = "就绪"
+		status_label.add_theme_color_override("font_color", Color("#4caf50"))
+	else:
+		name_label.text = skill_name
+		status_label.text = "冷却 %.1fs" % float(status.get("cooldown_remaining", 0.0))
+		status_label.add_theme_color_override("font_color", Color("#e05a5a"))
+
+
+func _on_flow_changed_refresh(_new_flow: BaseFlow) -> void:
+	refresh_ui()
 
 
 func _build_panel_content() -> void:
@@ -231,6 +266,31 @@ func _build_panel_content() -> void:
 	grid.add_child(_make_label("核心资源", 16, Color("#8a8a8a")))
 	resource_value = _make_label("", 16, Color("#ffffff"))
 	grid.add_child(resource_value)
+
+	# 技能区域
+	var skill_box := VBoxContainer.new()
+	skill_box.add_theme_constant_override("separation", 8)
+	right_col.add_child(skill_box)
+
+	var q_row := HBoxContainer.new()
+	q_row.add_theme_constant_override("separation", 10)
+	skill_box.add_child(q_row)
+	q_row.add_child(_make_label("Q:", 15, Color("#8a8a8a")))
+	q_name_label = _make_label("", 15, Color("#ffffff"))
+	q_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	q_row.add_child(q_name_label)
+	q_status_label = _make_label("", 15, Color("#888888"))
+	q_row.add_child(q_status_label)
+
+	var r_row := HBoxContainer.new()
+	r_row.add_theme_constant_override("separation", 10)
+	skill_box.add_child(r_row)
+	r_row.add_child(_make_label("R:", 15, Color("#8a8a8a")))
+	r_name_label = _make_label("", 15, Color("#ffffff"))
+	r_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r_row.add_child(r_name_label)
+	r_status_label = _make_label("", 15, Color("#888888"))
+	r_row.add_child(r_status_label)
 
 	right_col.add_child(HSeparator.new())
 

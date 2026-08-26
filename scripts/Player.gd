@@ -112,6 +112,14 @@ var base_max_hp: int = 100
 var base_speed: float = 5.0
 var current_flow: BaseFlow
 
+## 技能资源（守拙/点墨/藏锋）
+var current_shield: int = 0
+var current_pool: float = 0.0
+var current_shadow: int = 0
+
+var _q_prev := false
+var _r_prev := false
+
 
 func _ready() -> void:
 	current_flow = FlowManager.get_current()
@@ -161,6 +169,19 @@ func _physics_process(delta: float) -> void:
 			_update_hurt(delta)
 	_update_state_label()
 	_update_camera()
+
+
+func _process(_delta: float) -> void:
+	if current_flow == null:
+		return
+	var q := Input.is_physical_key_pressed(KEY_Q)
+	if q and not _q_prev:
+		_try_cast_skill("q")
+	_q_prev = q
+	var r := Input.is_physical_key_pressed(KEY_R)
+	if r and not _r_prev:
+		_try_cast_skill("r")
+	_r_prev = r
 
 
 ## ============ 输入处理 ============
@@ -369,6 +390,8 @@ func _apply_attack_detection() -> void:
 		hit_any = true
 	if hit_any:
 		current_flow.on_attack_hit()
+		_sync_resources_from_flow()
+		FlowManager.skill_used.emit()
 
 
 ## ============ 闪避 ============
@@ -389,6 +412,8 @@ func _start_dodge() -> void:
 	dodge_cooldown_timer = dodge_cooldown
 	velocity = Vector3.ZERO
 	current_flow.on_dodge()
+	_sync_resources_from_flow()
+	FlowManager.skill_used.emit()
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := _camera_relative_direction(input_dir)
@@ -435,6 +460,8 @@ func take_damage(amount: float, from_position: Vector3) -> void:
 				_flash_block()
 				perfect_block_timer = perfect_block_window
 				current_flow.on_block()
+				_sync_resources_from_flow()
+				FlowManager.skill_used.emit()
 	player_health -= final_damage
 	print("玩家受击 -%.1f 伤害，剩余血量 %.1f" % [final_damage, player_health])
 	if player_health <= 0.0:
@@ -609,4 +636,103 @@ func _on_flow_changed(new_flow: BaseFlow) -> void:
 	if player_health > player_max_health:
 		player_health = player_max_health
 	move_speed = base_speed * new_flow.speed_mult
+	_sync_resources_from_flow()
 	print("已应用流派: %s" % new_flow.flow_name)
+
+
+## ============ 技能系统 ============
+
+func _try_cast_skill(skill_id: String) -> void:
+	if current_flow == null:
+		return
+	var result: Dictionary = current_flow.cast_skill(skill_id, self)
+	if not result.get("success", false):
+		print("技能失败: ", result.get("reason", ""))
+		return
+	var flow_name := current_flow.flow_name
+	if skill_id == "r" and flow_name == "守拙":
+		_cast_shouzhuo_r()
+	else:
+		var radius := float(result.get("range", 0.0))
+		var mult := float(result.get("damage_mult", 0.0))
+		if radius > 0.0 and mult > 0.0:
+			apply_damage_in_area(radius, GlobalStats.base_atk * current_flow.damage_mult * mult)
+		if skill_id == "q" and flow_name == "点墨":
+			print("墨引已放置")
+		elif skill_id == "r" and flow_name == "藏锋":
+			print("墨牢已释放")
+	FlowManager.skill_used.emit()
+
+
+func _cast_shouzhuo_r() -> void:
+	var flow := current_flow
+	var mults: Array[float] = [2.0, 2.8, 3.6]
+	for i in range(3):
+		await get_tree().create_timer(0.2).timeout
+		apply_damage_in_area(5.0, GlobalStats.base_atk * flow.damage_mult * mults[i])
+
+
+func apply_damage_in_area(radius: float, damage: float) -> void:
+	var facing := -global_transform.basis.z
+	facing.y = 0.0
+	facing = facing.normalized()
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not (enemy is Node3D):
+			continue
+		var body := enemy as Node3D
+		var to_enemy: Vector3 = body.global_position - global_position
+		to_enemy.y = 0.0
+		if to_enemy.length() > radius:
+			continue
+		var dir := to_enemy.normalized() if to_enemy.length_squared() > 0.0001 else facing
+		if body.has_method("take_damage"):
+			body.call("take_damage", damage, dir)
+
+
+## ============ 资源同步 ============
+
+func get_current_resources() -> Dictionary:
+	_sync_resources_from_flow()
+	return {"shield": current_shield, "pool": current_pool, "shadow": current_shadow}
+
+
+func deduct_resource(cost: Dictionary) -> bool:
+	if cost.has("shield"):
+		if current_shield >= int(cost["shield"]):
+			current_shield -= int(cost["shield"])
+			_sync_resources_to_flow()
+			return true
+	if cost.has("pool"):
+		if current_pool >= float(cost["pool"]):
+			current_pool -= float(cost["pool"])
+			_sync_resources_to_flow()
+			return true
+	if cost.has("shadow"):
+		if current_shadow >= int(cost["shadow"]):
+			current_shadow -= int(cost["shadow"])
+			_sync_resources_to_flow()
+			return true
+	return false
+
+
+func _sync_resources_from_flow() -> void:
+	current_shield = 0
+	current_pool = 0.0
+	current_shadow = 0
+	if current_flow == null:
+		return
+	if current_flow is Flow_Shouzhuo:
+		current_shield = (current_flow as Flow_Shouzhuo).shield
+	elif current_flow is Flow_Dianmo:
+		current_pool = (current_flow as Flow_Dianmo).pool
+	elif current_flow is Flow_Cangfeng:
+		current_shadow = (current_flow as Flow_Cangfeng).shadow
+
+
+func _sync_resources_to_flow() -> void:
+	if current_flow is Flow_Shouzhuo:
+		(current_flow as Flow_Shouzhuo).shield = current_shield
+	elif current_flow is Flow_Dianmo:
+		(current_flow as Flow_Dianmo).pool = current_pool
+	elif current_flow is Flow_Cangfeng:
+		(current_flow as Flow_Cangfeng).shadow = current_shadow
