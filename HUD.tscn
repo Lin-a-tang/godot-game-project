@@ -1,0 +1,189 @@
+[gd_scene format=3 uid="uid://bjdkryugtxlcq"]
+
+[ext_resource type="Script" uid="uid://dt6bafj63jut3" path="res://HUD.gd" id="1_k5de2"]
+
+[node name="HUD" type="CanvasLayer" unique_id=1248398892]
+script = ExtResource("1_k5de2")
+
+[node name="Avatar" type="Panel" parent="." unique_id=265387973]
+offset_left = 38.0
+offset_top = 22.0
+offset_right = 98.0
+offset_bottom = 82.0
+
+[node name="HPBar" type="TextureProgressBar" parent="." unique_id=175610371]
+offset_left = 108.0
+offset_top = 22.0
+offset_right = 408.0
+offset_bottom = 42.0
+value = 100.0
+
+[node name="HPLabel" type="Label" parent="." unique_id=1091176732]
+offset_left = 108.0
+offset_top = 22.0
+offset_right = 408.0
+offset_bottom = 42.0
+text = "HP: 100/100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResourceBar" type="TextureProgressBar" parent="." unique_id=220045556]
+offset_left = 108.0
+offset_top = 47.0
+offset_right = 408.0
+offset_bottom = 63.0
+max_value = 5.0
+
+[node name="ResourceLabel" type="Label" parent="." unique_id=1847288149]
+offset_left = 108.0
+offset_top = 47.0
+offset_right = 408.0
+offset_bottom = 63.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FlowNameLabel" type="Label" parent="." unique_id=1184404262]
+offset_left = 423.0
+offset_top = 45.0
+offset_right = 680.0
+offset_bottom = 75.0
+text = "■ 守拙"
+
+[node name="LevelLabel" type="Label" parent="." unique_id=1927166199]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -380.0
+offset_top = 22.0
+offset_right = -220.0
+offset_bottom = 46.0
+text = "等级: 1"
+
+[node name="SkillPointsLabel" type="Label" parent="." unique_id=2115314958]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 22.0
+offset_right = -38.0
+offset_bottom = 46.0
+text = "技能点: 2"
+
+[node name="ChapterLabel" type="Label" parent="." unique_id=1451201086]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_top = 51.0
+offset_right = -38.0
+offset_bottom = 70.0
+text = "第1章 · 枯禅寺"
+
+[node name="QSkillPanel" type="Panel" parent="." unique_id=1231264932]
+anchors_preset = -1
+anchor_left = 0.45
+anchor_top = 0.95
+anchor_right = 0.45
+anchor_bottom = 0.95
+offset_left = -100.0
+offset_top = -80.0
+
+[node name="QSkillName" type="Label" parent="QSkillPanel" unique_id=314046790]
+layout_mode = 0
+anchor_right = 1.0
+offset_top = 6.0
+offset_bottom = 28.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QKeyLabel" type="Label" parent="QSkillPanel" unique_id=1659867947]
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -26.0
+offset_bottom = -4.0
+text = "Q"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QCoolingOverlay" type="ColorRect" parent="QSkillPanel" unique_id=734648625]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="QCoolingLabel" type="Label" parent="QSkillPanel" unique_id=1259872611]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RSkillPanel" type="Panel" parent="." unique_id=2050026156]
+anchors_preset = -1
+anchor_left = 0.55
+anchor_top = 0.95
+anchor_right = 0.55
+anchor_bottom = 0.95
+offset_top = -80.0
+offset_right = 100.0
+
+[node name="RSkillName" type="Label" parent="RSkillPanel" unique_id=1148364682]
+layout_mode = 0
+anchor_right = 1.0
+offset_top = 6.0
+offset_bottom = 28.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RKeyLabel" type="Label" parent="RSkillPanel" unique_id=1856362196]
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -26.0
+offset_bottom = -4.0
+text = "R"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RCoolingOverlay" type="ColorRect" parent="RSkillPanel" unique_id=14934344]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="RCoolingLabel" type="Label" parent="RSkillPanel" unique_id=2130025491]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DodgeIcon" type="Panel" parent="." unique_id=135153061]
+anchors_preset = -1
+anchor_left = 0.96
+anchor_top = 0.95
+anchor_right = 0.96
+anchor_bottom = 0.95
+offset_left = -60.0
+offset_top = -60.0
+
+[node name="DodgeTextLabel" type="Label" parent="DodgeIcon" unique_id=1166043160]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "闪"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DodgeCooldownOverlay" type="ColorRect" parent="DodgeIcon" unique_id=312210349]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="DodgeCooldownLabel" type="Label" parent="DodgeIcon" unique_id=1352859614]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1

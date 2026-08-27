@@ -25,7 +25,7 @@ func init_skills() -> void:
 func get_skill_status(skill_id: String) -> Dictionary:
 	var data: Dictionary = skill_data.get(skill_id, {})
 	if data.is_empty():
-		return {"is_ready": false, "cooldown_remaining": 0.0, "name": "", "desc": ""}
+		return {"is_ready": false, "cooldown_remaining": 0.0, "name": "未解锁", "desc": ""}
 	var remaining := float(cooldown_timers.get(skill_id, 0.0))
 	return {
 		"is_ready": remaining <= 0.0,
@@ -40,6 +40,8 @@ func can_cast(skill_id: String, player_resources: Dictionary) -> bool:
 		return false
 	var cost: Dictionary = skill_data.get(skill_id, {}).get("cost", {})
 	for key in cost:
+		if key == "hp_percent":
+			continue
 		if not player_resources.has(key):
 			return false
 		if float(player_resources[key]) < float(cost[key]):

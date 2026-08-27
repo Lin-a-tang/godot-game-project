@@ -2,7 +2,7 @@ extends Control
 ## 《墨渊》流派面板 UI（程序化生成，无场景文件）。
 ## 按 T 键切换显隐；打开时暂停游戏（Engine.time_scale = 0），关闭时恢复。
 
-const FLOW_NAMES := ["守拙", "点墨", "藏锋"]
+const FLOW_NAMES := ["守拙", "点墨", "藏锋", "归砚", "点睛"]
 
 var panel: Panel
 var level_label: Label
@@ -157,6 +157,8 @@ func _resource_text(flow: BaseFlow) -> String:
 		return "砚池: %.0f/100" % (flow as Flow_Dianmo).pool
 	elif flow is Flow_Cangfeng:
 		return "残影: %d/3" % (flow as Flow_Cangfeng).shadow
+	elif flow is Flow_Guiyan:
+		return "墨魂: %d/5" % (flow as Flow_Guiyan).motes
 	return "--"
 
 
@@ -167,6 +169,19 @@ func _flow_desc(flow: BaseFlow) -> String:
 		return "点墨成兵，攻击命中积累砚池。"
 	elif flow is Flow_Cangfeng:
 		return "藏锋于身，闪避时积累残影。"
+	elif flow is Flow_Guiyan:
+		return "以墨魂驭蝶，可攻可辅。"
+	elif flow is Flow_Dianjing:
+		return "以血为墨，濒死爆发。"
+	return ""
+
+
+func _unlock_tip(index: int) -> String:
+	match index:
+		3:
+			return "需要收集 20 件记忆碎片"
+		4:
+			return "需要收集 35 件记忆碎片 且 与砚对话 3 次"
 	return ""
 
 
@@ -236,6 +251,10 @@ func _build_panel_content() -> void:
 	flow_buttons.clear()
 	for i in range(FLOW_NAMES.size()):
 		var btn := _create_flow_button(FLOW_NAMES[i], i)
+		if not FlowManager.is_flow_unlocked(i):
+			btn.text = "🔒 " + FLOW_NAMES[i]
+			btn.disabled = true
+			btn.tooltip_text = _unlock_tip(i)
 		left_col.add_child(btn)
 		flow_buttons.append(btn)
 

@@ -8,6 +8,8 @@ var skill_points: int = 2
 var current_exp: int = 0
 var exp_to_next: int = 50
 var base_atk: int = 10
+var memory_fragments: int = 0
+var met_yan_count: int = 0
 
 
 func add_exp(amount: int) -> void:
@@ -27,3 +29,13 @@ func use_skill_point() -> bool:
 		stats_updated.emit()
 		return true
 	return false
+
+
+func add_fragment(count: int = 1) -> void:
+	memory_fragments += count
+	print("记忆碎片: %d" % memory_fragments)
+
+
+func add_yan_meeting() -> void:
+	met_yan_count += 1
+	print("砚的邂逅: %d" % met_yan_count)

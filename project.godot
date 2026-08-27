@@ -21,6 +21,7 @@ _MCPGameBridge="*uid://cds186n8uv4f0"
 FlowManager="*res://scripts/FlowManager.gd"
 GlobalStats="*res://scripts/GlobalStats.gd"
 FlowPanel="*res://scripts/FlowPanel.gd"
+HUD="*res://HUD.tscn"
 
 [display]
 

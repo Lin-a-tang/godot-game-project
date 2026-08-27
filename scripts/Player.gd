@@ -21,6 +21,8 @@ enum AttackKind { LIGHT, HEAVY }
 
 const GRAVITY := 9.8
 
+signal health_changed(current: float, max: float)
+
 ## ============ 移动 ============
 @export var move_speed: float = 5.0
 @export var turn_speed: float = 12.0
@@ -61,7 +63,7 @@ const GRAVITY := 9.8
 ## ============ 闪避 ============
 @export var dodge_distance: float = 3.5
 @export var dodge_duration: float = 0.3
-@export var dodge_cooldown: float = 0.5
+@export var dodge_cooldown_max: float = 0.5
 
 ## ============ 格挡 ============
 @export var block_front_angle_deg: float = 120.0
@@ -97,7 +99,7 @@ var left_hold_time: float = 0.0
 
 var is_invincible: bool = false
 var dodge_timer: float = 0.0
-var dodge_cooldown_timer: float = 0.0
+var dodge_cooldown_remaining: float = 0.0
 var dodge_tween: Tween
 var dodge_fade_tween: Tween
 
@@ -112,10 +114,12 @@ var base_max_hp: int = 100
 var base_speed: float = 5.0
 var current_flow: BaseFlow
 
-## 技能资源（守拙/点墨/藏锋）
+## 技能资源（守拙/点墨/藏锋/归砚）
 var current_shield: int = 0
 var current_pool: float = 0.0
 var current_shadow: int = 0
+var current_motes: int = 0
+var is_berserk: bool = false
 
 var _q_prev := false
 var _r_prev := false
@@ -127,6 +131,7 @@ func _ready() -> void:
 	player_health = player_max_health
 	move_speed = base_speed * current_flow.speed_mult
 	FlowManager.flow_changed.connect(_on_flow_changed)
+	add_to_group("player")
 	animation_player = get_node_or_null("AnimationPlayer")
 	if animation_player == null:
 		animation_player = AnimationPlayer.new()
@@ -171,7 +176,16 @@ func _physics_process(delta: float) -> void:
 	_update_camera()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if dodge_cooldown_remaining > 0.0:
+		dodge_cooldown_remaining = maxf(dodge_cooldown_remaining - delta, 0.0)
+	if is_berserk:
+		player_health -= player_max_health * 0.01 * delta
+		health_changed.emit(player_health, player_max_health)
+		if player_health <= 0.0:
+			player_health = player_max_health
+			is_berserk = false
+			print("泣血·狂耗尽生命（灰盒复活）")
 	if current_flow == null:
 		return
 	var q := Input.is_physical_key_pressed(KEY_Q)
@@ -400,7 +414,7 @@ func _try_dodge() -> void:
 	# 攻击 / 蓄力 / 闪避 / 受击期间，丢弃闪避输入
 	if state in [State.ATTACKING, State.CHARGING, State.DODGING, State.HURT]:
 		return
-	if dodge_cooldown_timer > 0.0:
+	if dodge_cooldown_remaining > 0.0:
 		return
 	_start_dodge()
 
@@ -409,7 +423,7 @@ func _start_dodge() -> void:
 	state = State.DODGING
 	is_invincible = true
 	dodge_timer = dodge_duration
-	dodge_cooldown_timer = dodge_cooldown
+	dodge_cooldown_remaining = dodge_cooldown_max
 	velocity = Vector3.ZERO
 	current_flow.on_dodge()
 	_sync_resources_from_flow()
@@ -467,6 +481,7 @@ func take_damage(amount: float, from_position: Vector3) -> void:
 	if player_health <= 0.0:
 		player_health = player_max_health  # 灰盒：自动复活
 		print("玩家死亡（灰盒暂不处理）")
+	health_changed.emit(player_health, player_max_health)
 
 
 ## ============ 移动 / 朝向 ============
@@ -524,8 +539,6 @@ func _update_timers(delta: float) -> void:
 		combo_timer -= delta
 		if combo_timer <= 0.0:
 			combo_index = 0
-	if dodge_cooldown_timer > 0.0:
-		dodge_cooldown_timer -= delta
 	if perfect_block_timer > 0.0:
 		perfect_block_timer -= delta
 
@@ -637,6 +650,7 @@ func _on_flow_changed(new_flow: BaseFlow) -> void:
 		player_health = player_max_health
 	move_speed = base_speed * new_flow.speed_mult
 	_sync_resources_from_flow()
+	health_changed.emit(player_health, player_max_health)
 	print("已应用流派: %s" % new_flow.flow_name)
 
 
@@ -652,6 +666,10 @@ func _try_cast_skill(skill_id: String) -> void:
 	var flow_name := current_flow.flow_name
 	if skill_id == "r" and flow_name == "守拙":
 		_cast_shouzhuo_r()
+	elif skill_id == "q" and flow_name == "归砚":
+		_cast_guiyan_q()
+	elif skill_id == "q" and flow_name == "点睛":
+		_cast_dianjing_q()
 	else:
 		var radius := float(result.get("range", 0.0))
 		var mult := float(result.get("damage_mult", 0.0))
@@ -661,6 +679,11 @@ func _try_cast_skill(skill_id: String) -> void:
 			print("墨引已放置")
 		elif skill_id == "r" and flow_name == "藏锋":
 			print("墨牢已释放")
+		elif skill_id == "r" and flow_name == "归砚":
+			print("共生：墨蝶附着，每秒回血2%，移速+10%")
+		elif skill_id == "r" and flow_name == "点睛":
+			is_berserk = true
+			print("进入泣血·狂状态")
 	FlowManager.skill_used.emit()
 
 
@@ -670,6 +693,21 @@ func _cast_shouzhuo_r() -> void:
 	for i in range(3):
 		await get_tree().create_timer(0.2).timeout
 		apply_damage_in_area(5.0, GlobalStats.base_atk * flow.damage_mult * mults[i])
+
+
+func _cast_guiyan_q() -> void:
+	var flow := current_flow
+	print("蝶潮：召唤5只墨蝶")
+	for i in range(5):
+		apply_damage_in_area(5.0, GlobalStats.base_atk * flow.damage_mult * 0.4)
+
+
+func _cast_dianjing_q() -> void:
+	var flow := current_flow
+	print("藏泪：放置墨泪")
+	await get_tree().create_timer(3.0).timeout
+	print("墨泪爆炸！")
+	apply_damage_in_area(6.0, GlobalStats.base_atk * flow.damage_mult * 2.5)
 
 
 func apply_damage_in_area(radius: float, damage: float) -> void:
@@ -693,7 +731,7 @@ func apply_damage_in_area(radius: float, damage: float) -> void:
 
 func get_current_resources() -> Dictionary:
 	_sync_resources_from_flow()
-	return {"shield": current_shield, "pool": current_pool, "shadow": current_shadow}
+	return {"shield": current_shield, "pool": current_pool, "shadow": current_shadow, "motes": current_motes}
 
 
 func deduct_resource(cost: Dictionary) -> bool:
@@ -712,6 +750,15 @@ func deduct_resource(cost: Dictionary) -> bool:
 			current_shadow -= int(cost["shadow"])
 			_sync_resources_to_flow()
 			return true
+	if cost.has("motes"):
+		if current_motes >= int(cost["motes"]):
+			current_motes -= int(cost["motes"])
+			_sync_resources_to_flow()
+			return true
+	if cost.has("hp_percent"):
+		player_health -= player_max_health * float(cost["hp_percent"]) / 100.0
+		health_changed.emit(player_health, player_max_health)
+		return true
 	return false
 
 
@@ -719,6 +766,7 @@ func _sync_resources_from_flow() -> void:
 	current_shield = 0
 	current_pool = 0.0
 	current_shadow = 0
+	current_motes = 0
 	if current_flow == null:
 		return
 	if current_flow is Flow_Shouzhuo:
@@ -727,6 +775,8 @@ func _sync_resources_from_flow() -> void:
 		current_pool = (current_flow as Flow_Dianmo).pool
 	elif current_flow is Flow_Cangfeng:
 		current_shadow = (current_flow as Flow_Cangfeng).shadow
+	elif current_flow is Flow_Guiyan:
+		current_motes = (current_flow as Flow_Guiyan).motes
 
 
 func _sync_resources_to_flow() -> void:
@@ -736,3 +786,5 @@ func _sync_resources_to_flow() -> void:
 		(current_flow as Flow_Dianmo).pool = current_pool
 	elif current_flow is Flow_Cangfeng:
 		(current_flow as Flow_Cangfeng).shadow = current_shadow
+	elif current_flow is Flow_Guiyan:
+		(current_flow as Flow_Guiyan).motes = current_motes

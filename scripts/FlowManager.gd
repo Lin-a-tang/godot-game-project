@@ -10,7 +10,7 @@ var current_index: int = 0
 
 
 func _ready() -> void:
-	flows = [Flow_Shouzhuo.new(), Flow_Dianmo.new(), Flow_Cangfeng.new()]
+	flows = [Flow_Shouzhuo.new(), Flow_Dianmo.new(), Flow_Cangfeng.new(), Flow_Guiyan.new(), Flow_Dianjing.new()]
 	for flow in flows:
 		add_child(flow)
 
@@ -31,10 +31,24 @@ func switch_next() -> void:
 func switch_to(index: int) -> void:
 	if index < 0 or index >= flows.size():
 		return
+	if not is_flow_unlocked(index):
+		print("该流派尚未解锁")
+		return
 	current_index = index
 	var flow: BaseFlow = flows[current_index]
 	print("手动切换至: %s" % flow.flow_name)
 	flow_changed.emit(flow)
+
+
+func is_flow_unlocked(index: int) -> bool:
+	match index:
+		0, 1, 2:
+			return true
+		3:
+			return GlobalStats.memory_fragments >= 20
+		4:
+			return GlobalStats.memory_fragments >= 35 and GlobalStats.met_yan_count >= 3
+	return false
 
 
 func get_current() -> BaseFlow:
