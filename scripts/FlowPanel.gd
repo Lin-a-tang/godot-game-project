@@ -20,6 +20,10 @@ var q_name_label: Label
 var q_status_label: Label
 var r_name_label: Label
 var r_status_label: Label
+var q_equip_name_label: Label
+var r_equip_name_label: Label
+var passive_equip_name_label: Label
+var talent_label: Label
 
 
 func _ready() -> void:
@@ -87,6 +91,7 @@ func _open_panel() -> void:
 
 
 func _close_panel() -> void:
+	SkillTooltip.hide_tip()
 	visible = false
 	Engine.time_scale = 1.0
 
@@ -96,17 +101,14 @@ func _on_overlay_gui_input(event: InputEvent) -> void:
 		_close_panel()
 
 
-func _on_flow_button_pressed(index: int) -> void:
-	FlowManager.switch_to(index)
-	refresh_ui()
+func _on_flow_button_pressed(_index: int) -> void:
+	# T 面板为只读，流派切换在安全点面板进行
+	print("T面板为只读，请在安全点切换流派")
 
 
 func _on_add_button_pressed() -> void:
-	if GlobalStats.use_skill_point():
-		print("消耗 1 技能点，剩余: ", GlobalStats.skill_points)
-	else:
-		print("技能点不足")
-	refresh_ui()
+	# T 面板为只读，技能点分配在安全点面板进行
+	print("T面板为只读，请在安全点分配技能点")
 
 
 func _on_close_button_pressed() -> void:
@@ -146,6 +148,24 @@ func refresh_ui() -> void:
 	var status_r: Dictionary = flow.get_skill_status("r")
 	_update_skill_label(q_name_label, q_status_label, status_q)
 	_update_skill_label(r_name_label, r_status_label, status_r)
+
+	# 装备显示
+	var equipped: Dictionary = flow.equipped_skills
+	var q_id: String = equipped.get("q", "")
+	var r_id: String = equipped.get("r", "")
+	var passive_id: String = equipped.get("passive", "")
+	q_equip_name_label.text = flow.skill_data.get(q_id, {}).get("name", "未装备")
+	r_equip_name_label.text = flow.skill_data.get(r_id, {}).get("name", "未装备")
+	passive_equip_name_label.text = flow.skill_data.get(passive_id, {}).get("name", "未装备")
+
+	# 词条展示
+	var talent_text := ""
+	for fragment in TalentData.FRAGMENT_TYPES:
+		var fname: String = TalentData.FRAGMENT_NAMES.get(fragment, fragment)
+		var tid: String = TalentManager.get_selected_talent(fragment)
+		var tname: String = TalentData.get_talent(tid).get("name", "") if tid != "" else "未解锁"
+		talent_text += "%s: %s\n" % [fname, tname]
+	talent_label.text = talent_text.strip_edges()
 
 	queue_redraw()
 
@@ -205,14 +225,26 @@ func _on_flow_changed_refresh(_new_flow: BaseFlow) -> void:
 	refresh_ui()
 
 
+func _on_equip_skill_pressed(slot: String) -> void:
+	# T 面板为只读，技能更换在安全点面板进行
+	print("T面板为只读，请在安全点更换技能")
+
+
 func _build_panel_content() -> void:
+	var scroll := ScrollContainer.new()
+	scroll.name = "ScrollContainer"
+	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	panel.add_child(scroll)
+
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 24)
 	margin.add_theme_constant_override("margin_right", 24)
 	margin.add_theme_constant_override("margin_top", 20)
 	margin.add_theme_constant_override("margin_bottom", 20)
-	panel.add_child(margin)
+	scroll.add_child(margin)
 
 	var root_vbox := VBoxContainer.new()
 	root_vbox.add_theme_constant_override("separation", 16)
@@ -255,6 +287,8 @@ func _build_panel_content() -> void:
 			btn.text = "🔒 " + FLOW_NAMES[i]
 			btn.disabled = true
 			btn.tooltip_text = _unlock_tip(i)
+		else:
+			SkillTooltip.attach_button(self, btn)
 		left_col.add_child(btn)
 		flow_buttons.append(btn)
 
@@ -297,6 +331,7 @@ func _build_panel_content() -> void:
 	q_row.add_child(_make_label("Q:", 15, Color("#8a8a8a")))
 	q_name_label = _make_label("", 15, Color("#ffffff"))
 	q_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	SkillTooltip.attach(self, q_name_label)
 	q_row.add_child(q_name_label)
 	q_status_label = _make_label("", 15, Color("#888888"))
 	q_row.add_child(q_status_label)
@@ -307,6 +342,7 @@ func _build_panel_content() -> void:
 	r_row.add_child(_make_label("R:", 15, Color("#8a8a8a")))
 	r_name_label = _make_label("", 15, Color("#ffffff"))
 	r_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	SkillTooltip.attach(self, r_name_label)
 	r_row.add_child(r_name_label)
 	r_status_label = _make_label("", 15, Color("#888888"))
 	r_row.add_child(r_status_label)
@@ -316,6 +352,59 @@ func _build_panel_content() -> void:
 	desc_label = _make_label("", 15, Color("#aaaaaa"))
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right_col.add_child(desc_label)
+
+	# 词条系统（只读展示）
+	right_col.add_child(HSeparator.new())
+	right_col.add_child(_make_label("词条系统", 16, Color("#d4c9a8")))
+	talent_label = _make_label("", 13, Color("#aaaaaa"))
+	talent_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	right_col.add_child(talent_label)
+
+	# 技能装备区域
+	right_col.add_child(HSeparator.new())
+	right_col.add_child(_make_label("技能装备", 16, Color("#d4c9a8")))
+
+	var q_equip_row := HBoxContainer.new()
+	q_equip_row.add_theme_constant_override("separation", 10)
+	right_col.add_child(q_equip_row)
+	q_equip_row.add_child(_make_label("Q:", 14, Color("#8a8a8a")))
+	q_equip_name_label = _make_label("未装备", 14, Color("#ffffff"))
+	q_equip_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	SkillTooltip.attach(self, q_equip_name_label)
+	q_equip_row.add_child(q_equip_name_label)
+	var q_equip_btn := Button.new()
+	q_equip_btn.text = "更换"
+	q_equip_btn.custom_minimum_size = Vector2(60.0, 28.0)
+	q_equip_btn.pressed.connect(_on_equip_skill_pressed.bind("q"))
+	q_equip_row.add_child(q_equip_btn)
+
+	var r_equip_row := HBoxContainer.new()
+	r_equip_row.add_theme_constant_override("separation", 10)
+	right_col.add_child(r_equip_row)
+	r_equip_row.add_child(_make_label("R:", 14, Color("#8a8a8a")))
+	r_equip_name_label = _make_label("未装备", 14, Color("#ffffff"))
+	r_equip_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	SkillTooltip.attach(self, r_equip_name_label)
+	r_equip_row.add_child(r_equip_name_label)
+	var r_equip_btn := Button.new()
+	r_equip_btn.text = "更换"
+	r_equip_btn.custom_minimum_size = Vector2(60.0, 28.0)
+	r_equip_btn.pressed.connect(_on_equip_skill_pressed.bind("r"))
+	r_equip_row.add_child(r_equip_btn)
+
+	var passive_equip_row := HBoxContainer.new()
+	passive_equip_row.add_theme_constant_override("separation", 10)
+	right_col.add_child(passive_equip_row)
+	passive_equip_row.add_child(_make_label("被动:", 14, Color("#8a8a8a")))
+	passive_equip_name_label = _make_label("未装备", 14, Color("#ffffff"))
+	passive_equip_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	SkillTooltip.attach(self, passive_equip_name_label)
+	passive_equip_row.add_child(passive_equip_name_label)
+	var passive_equip_btn := Button.new()
+	passive_equip_btn.text = "更换"
+	passive_equip_btn.custom_minimum_size = Vector2(60.0, 28.0)
+	passive_equip_btn.pressed.connect(_on_equip_skill_pressed.bind("passive"))
+	passive_equip_row.add_child(passive_equip_btn)
 
 	# 底部
 	var bottom := HBoxContainer.new()

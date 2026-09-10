@@ -34,6 +34,8 @@ func use_skill_point() -> bool:
 func add_fragment(count: int = 1) -> void:
 	memory_fragments += count
 	print("记忆碎片: %d" % memory_fragments)
+	if memory_fragments >= 30:
+		FlowManager.upgrade_guiyan_motes()
 
 
 func add_yan_meeting() -> void:

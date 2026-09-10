@@ -14,8 +14,10 @@ func _init() -> void:
 
 
 func init_skills() -> void:
-	skill_data["q"] = {"name": "扫墨", "desc": "消耗1层墨盾，造成150%范围伤害", "damage_mult": 1.5, "cooldown_max": 3.0, "range": 4.0, "cost": {"shield": 1}}
-	skill_data["r"] = {"name": "千山", "desc": "消耗3层墨盾，三段山影共造成840%伤害", "damage_mult": 2.8, "cooldown_max": 20.0, "range": 5.0, "cost": {"shield": 3}}
+	skill_data["q"] = {"name": "扫墨", "desc": "消耗1层墨盾，造成150%范围伤害", "damage_mult": 1.5, "cooldown_max": 3.0, "range": 4.0, "cost": {"shield": 1}, "type": "active"}
+	skill_data["r"] = {"name": "千山", "desc": "消耗3层墨盾，三段山影共造成840%伤害", "damage_mult": 2.8, "cooldown_max": 20.0, "range": 5.0, "cost": {"shield": 3}, "type": "active"}
+	skill_data["passive_1"] = {"name": "墨盾·化甲", "desc": "墨盾≥3层时自动回血", "damage_mult": 0.0, "cooldown_max": 0.0, "range": 0.0, "cost": {}, "type": "passive"}
+	skill_data["passive_2"] = {"name": "墨盾·韧性", "desc": "每层墨盾提供3%物理减伤", "damage_mult": 0.0, "cooldown_max": 0.0, "range": 0.0, "cost": {}, "type": "passive"}
 
 
 func on_block() -> void:

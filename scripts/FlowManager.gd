@@ -4,6 +4,7 @@ extends Node
 
 signal flow_changed(new_flow: BaseFlow)
 signal skill_used()
+signal skill_equipped(flow_index: int, slot: String, skill_id: String)
 
 var flows: Array[BaseFlow] = []
 var current_index: int = 0
@@ -53,3 +54,44 @@ func is_flow_unlocked(index: int) -> bool:
 
 func get_current() -> BaseFlow:
 	return flows[current_index]
+
+
+func equip_skill(flow_index: int, slot: String, skill_id: String) -> bool:
+	if flow_index < 0 or flow_index >= flows.size():
+		return false
+	var flow: BaseFlow = flows[flow_index]
+	if flow.equip_skill(slot, skill_id):
+		skill_equipped.emit(flow_index, slot, skill_id)
+		return true
+	return false
+
+
+func get_equipped_skills(flow_index: int) -> Dictionary:
+	if flow_index < 0 or flow_index >= flows.size():
+		return {}
+	return flows[flow_index].equipped_skills
+
+
+func get_unlocked_active_skills(flow_index: int) -> Array:
+	if flow_index < 0 or flow_index >= flows.size():
+		return []
+	return flows[flow_index].get_unlocked_active_skills()
+
+
+func get_unlocked_passive_skills(flow_index: int) -> Array:
+	if flow_index < 0 or flow_index >= flows.size():
+		return []
+	return flows[flow_index].get_unlocked_passive_skills()
+
+
+func upgrade_guiyan_motes() -> void:
+	for flow in flows:
+		if flow is Flow_Guiyan:
+			(flow as Flow_Guiyan).upgrade_motes()
+
+
+## 记忆碎片解锁后刷新各流派技能解锁（补默认装备）并广播给 HUD
+func refresh_skill_unlocks() -> void:
+	for flow in flows:
+		flow.reevaluate_unlocks()
+	flow_changed.emit(get_current())

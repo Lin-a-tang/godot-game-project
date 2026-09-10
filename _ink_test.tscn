@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cnnwrymlslhbp"]
+
+[ext_resource type="PackedScene" uid="uid://bi2hyqnm57n1f" path="res://assets/imported/inkstone.glb" id="1_mh156"]
+
+[node name="InkTest" type="Node3D" unique_id=1764650655]
+
+[node name="Inkstone" type="Node3D" parent="." unique_id=510971485 instance=ExtResource("1_mh156")]

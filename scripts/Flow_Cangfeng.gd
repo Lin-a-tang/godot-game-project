@@ -14,8 +14,10 @@ func _init() -> void:
 
 
 func init_skills() -> void:
-	skill_data["q"] = {"name": "残影·引爆", "desc": "消耗1层残影，引爆造成180%范围伤害", "damage_mult": 1.8, "cooldown_max": 0.0, "range": 3.0, "cost": {"shadow": 1}}
-	skill_data["r"] = {"name": "墨牢", "desc": "消耗3层残影，困住敌人2秒", "damage_mult": 0.0, "cooldown_max": 15.0, "range": 4.0, "cost": {"shadow": 3}}
+	skill_data["q"] = {"name": "残影·引爆", "desc": "消耗1层残影，引爆造成180%范围伤害", "damage_mult": 1.8, "cooldown_max": 0.0, "range": 3.0, "cost": {"shadow": 1}, "type": "active"}
+	skill_data["r"] = {"name": "墨牢", "desc": "消耗3层残影，困住敌人2秒", "damage_mult": 0.0, "cooldown_max": 15.0, "range": 4.0, "cost": {"shadow": 3}, "type": "active"}
+	skill_data["passive_1"] = {"name": "藏锋·被动", "desc": "背刺暴击率+40%；脱战移速+20%", "damage_mult": 0.0, "cooldown_max": 0.0, "range": 0.0, "cost": {}, "type": "passive"}
+	skill_data["passive_2"] = {"name": "残影·蚀", "desc": "残影·引爆命中后敌人攻击-15%，持续3秒", "damage_mult": 0.0, "cooldown_max": 0.0, "range": 0.0, "cost": {}, "type": "passive"}
 
 
 func on_dodge() -> void:

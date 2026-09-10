@@ -14,8 +14,10 @@ func _init() -> void:
 
 
 func init_skills() -> void:
-	skill_data["q"] = {"name": "墨引", "desc": "标记地面，持续5秒，路过墨弹分裂", "damage_mult": 0.0, "cooldown_max": 6.0, "range": 0.0, "cost": {}}
-	skill_data["r"] = {"name": "墨雨", "desc": "消耗50%砚池，10滴墨滴每滴40%伤害", "damage_mult": 0.4, "cooldown_max": 8.0, "range": 5.0, "cost": {"pool": 50}}
+	skill_data["q"] = {"name": "墨引", "desc": "标记地面，持续5秒，路过墨弹分裂", "damage_mult": 0.0, "cooldown_max": 6.0, "range": 0.0, "cost": {}, "type": "active"}
+	skill_data["r"] = {"name": "墨雨", "desc": "消耗50%砚池，10滴墨滴每滴40%伤害", "damage_mult": 0.4, "cooldown_max": 8.0, "range": 5.0, "cost": {"pool": 50}, "type": "active"}
+	skill_data["passive_1"] = {"name": "砚池·满溢", "desc": "≥80%时伤害+30%，附浸墨易伤", "damage_mult": 0.0, "cooldown_max": 0.0, "range": 0.0, "cost": {}, "type": "passive"}
+	skill_data["passive_2"] = {"name": "墨引·回响", "desc": "墨引标记期间移速+10%", "damage_mult": 0.0, "cooldown_max": 0.0, "range": 0.0, "cost": {}, "type": "passive"}
 
 
 func on_attack_hit() -> void:

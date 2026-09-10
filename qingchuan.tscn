@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://cfnstyhsqxahj"]
+
+[ext_resource type="PackedScene" uid="uid://sc32ibd87thu" path="res://assets/imported/qingchuan.glb" id="1_q7dhb"]
+
+[node name="qingchuan" unique_id=707480378 instance=ExtResource("1_q7dhb")]
